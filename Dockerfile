@@ -1,25 +1,35 @@
-FROM webdevops/php-nginx:8.2-alpine
-# تثبيت Node.js و npm
-USER root
-RUN apt-get update && apt-get install -y nodejs npm git unzip && rm -rf /var/lib/apt/lists/*
-USER application
+FROM php:8.2-fpm
 
-WORKDIR /app
-COPY --chown=application:application . .
+# تثبيت المتطلبات الأساسية
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    zip \
+    unzip \
+    nginx \
+    nodejs \
+    npm \
+    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
 
-# زيادة حد الذاكرة لـ PHP مؤقتاً لـ Composer
-ENV COMPOSER_MEMORY_LIMIT=-1
-ENV PHP_MEMORY_LIMIT=512M
+# تثبيت Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# 1. تثبيت مكتبات PHP (بدون scripts لتوفير الذاكرة)
-RUN composer install --no-dev --optimize-autoloader --no-scripts --ignore-platform-reqs && \
-    php artisan key:generate && \
-    php artisan storage:link
+WORKDIR /var/www/html
+COPY . .
 
-# 2. بناء الـ Assets (CSS/JS)
-RUN npm install && npm run build
+# إعداد الصلاحيات
+RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+
+# إعداد Nginx
+COPY nginx.conf /etc/nginx/sites-available/default
 
 EXPOSE 8080
 
-# 3. تشغيل Migrations ثم الموقع
-CMD php artisan migrate --force && php-fpm
+# أمر التشغيل النهائي
+CMD service php8.2-fpm start && \
+    nginx -c /etc/nginx/nginx.conf && \
+    php artisan migrate --force && \
+    tail -f /var/log/nginx/access.log
