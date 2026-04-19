@@ -1,23 +1,53 @@
-FROM webdevops/php-nginx:8.2
+# نستخدم صورة Alpine خفيفة وقياسية
+FROM php:8.2-fpm-alpine
 
-# 1. تثبيت Node.js و npm (لأن الصورة الأساسية لا تحتويهم)
-USER root
-RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
-USER application
+# نثبت كل المتطلبات كـ root وقت البناء (مسموح)
+RUN apk add --no-cache \
+    nginx \
+    nodejs \
+    npm \
+    git \
+    unzip \
+    libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    icu-libs \
+    zlib-dev \
+    libzip-dev \
+    postgresql-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_pgsql \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        gd \
+        zip \
+        intl
 
-# نسخ الملفات مع ضبط الصلاحيات
-COPY --chown=application:application . /app
-WORKDIR /app
+# نثبت Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# إنشاء ملف .env من المثال عشان يشتغل artisan
-RUN cp .env.example .env
+WORKDIR /var/www/html
+COPY . .
 
-# 2. تثبيت مكتبات PHP وتجهيز الأساسيات
+# نجهز المشروع
 RUN composer install --no-dev --optimize-autoloader --no-scripts && \
+    cp .env.example .env && \
     php artisan key:generate && \
-    php artisan storage:link
+    php artisan storage:link && \
+    npm install && \
+    npm run build && \
+    chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
 
-# 3. بناء ملفات الواجهة (CSS/JS)
-RUN npm install && npm run build
+# نضيف إعدادات Nginx
+COPY nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 8080
+
+# نشتغل كـ www-data (المستخدم الآمن)
+USER www-data
+
+# أمر التشغيل: migrations ثم تشغيل الخدمات
+CMD php artisan migrate --force && php-fpm -D && nginx -g 'daemon off;'
