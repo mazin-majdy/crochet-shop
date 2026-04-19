@@ -1,35 +1,21 @@
-FROM php:8.2-fpm
+FROM webdevops/php-nginx:8.2-alpine
 
-# تثبيت المتطلبات الأساسية
-RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    nginx \
-    nodejs \
-    npm \
-    && docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+# نسخ ملفات المشروع
+COPY --chown=application:application . /app
+WORKDIR /app
 
-# تثبيت Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+# تثبيت التبعيات وتجهيز المشروع
+# نستخدم --ignore-platform-reqs لتجنب أخطاء الذاكرة على Render Free
+RUN composer install --no-dev --optimize-autoloader --ignore-platform-reqs && \
+    php artisan key:generate && \
+    php artisan storage:link && \
+    npm install && \
+    npm run build
 
-WORKDIR /var/www/html
-COPY . .
-
-# إعداد الصلاحيات
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
-
-# إعداد Nginx
-COPY nginx.conf /etc/nginx/sites-available/default
-
+# exposing port 8080 (المنفذ الافتراضي لـ Render)
 EXPOSE 8080
 
-# أمر التشغيل النهائي
-CMD service php8.2-fpm start && \
-    nginx -c /etc/nginx/nginx.conf && \
-    php artisan migrate --force && \
-    tail -f /var/log/nginx/access.log
+# ملاحظة: ما نحتاج نكتب CMD لأن الصورة مهيأة مسبقاً
+# لكن نحتاج ننفذ migrate قبل ما يقلع الموقع
+# الحل: نستخدم entrypoint بسيط
+ENTRYPOINT ["sh", "-c", "php artisan migrate --force && /entrypoint.d/20-php-fpm.sh && /entrypoint.d/30-nginx.sh"]
