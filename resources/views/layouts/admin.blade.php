@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="theme-color" content="#8B7355"> <!-- لون الشريط في الموبايل -->
     <title>@yield('title', 'لوحة التحكم') – لمسة خيط</title>
     <link rel="icon" type="image/svg+xml" href="{{ asset('images/favicon.svg') }}">
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&display=swap"
@@ -35,6 +36,17 @@
                 <a href="{{ route('admin.dashboard') }}"
                     class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <i class="bi bi-grid-1x2-fill"></i> الرئيسية
+                </a>
+
+                <a href="{{ route('admin.analytics') }}"
+                    class="{{ request()->routeIs('admin.analytics*') ? 'active' : '' }}">
+                    <i class="bi bi-graph-up-arrow"></i> التحليلات
+                    <span id="sb-active-badge"
+                        style="margin-right:auto;background:rgba(37,211,102,0.18);color:#1a8a4a;font-size:0.68rem;font-weight:800;padding:2px 8px;border-radius:20px;display:none">
+                        <span class="sb-pulse"
+                            style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#25D366;margin-left:4px;animation:dot-pulse 1.5s infinite"></span>
+                        <span id="sb-active-count">0</span> نشط
+                    </span>
                 </a>
 
                 <div class="nav-label">المنتجات</div>
@@ -215,163 +227,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ asset('js/admin.js') }}"></script>
-    {{-- <script>
-        // ═══════════════════════════════════════════════════════════════════════
-        // لمسة خيط — Real-time Notification System
-        // ═══════════════════════════════════════════════════════════════════════
 
-        const NOTIF_FEED_URL = '{{ route('admin.notifications.feed') }}';
-        const NOTIF_READ_URL = '/admin/notifications/{id}/read';
-        const NOTIF_ALL_READ_URL = '{{ route('admin.notifications.mark-all-read') }}';
-        const CSRF = '{{ csrf_token() }}';
-        const POLL_INTERVAL = 30000; // 30 seconds
-
-        let lastUnreadCount = -1; // نكتشف إذا في تغيير
-        let notifPollTimer = null;
-
-        // ── UI elements ────────────────────────────────────────────────────────
-        const badge = document.getElementById('notif-count-badge');
-        const bell = document.getElementById('notif-bell-icon');
-        const list = document.getElementById('notif-list');
-        const empty = document.getElementById('notif-empty');
-
-        // ── Fetch & Render ──────────────────────────────────────────────────────
-        async function fetchNotifications() {
-            try {
-                const res = await fetch(NOTIF_FEED_URL, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': CSRF
-                    },
-                });
-                if (!res.ok) return;
-                const data = await res.json();
-
-                renderBadge(data.unread_count);
-                renderList(data.notifications);
-
-                // صوت أو animation عند وصول إشعار جديد
-                if (lastUnreadCount !== -1 && data.unread_count > lastUnreadCount) {
-                    playBellAnimation();
-                }
-                lastUnreadCount = data.unread_count;
-
-            } catch (e) {
-                // صمت — لا تُظهر خطأ للمدير
-            }
-        }
-
-        function renderBadge(count) {
-            if (!badge) return;
-            if (count > 0) {
-                badge.textContent = count > 99 ? '99+' : count;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
-            }
-        }
-
-        function renderList(notifications) {
-            if (!list || !empty) return;
-
-            if (!notifications || notifications.length === 0) {
-                list.innerHTML = '';
-                empty.style.display = 'block';
-                return;
-            }
-
-            empty.style.display = 'none';
-
-            list.innerHTML = notifications.map(n => `
-    <a class="dropdown-item d-flex align-items-start notif-item ${n.is_read ? 'notif-read' : 'notif-unread'}"
-       href="${n.action_url || '#'}"
-       data-id="${n.id}"
-       onclick="notifMarkRead(event, ${n.id}, '${n.action_url}')">
-      <div class="notify-icon me-1" style="background:${n.icon_bg};color:${n.icon_color};flex-shrink:0">
-        <i class="bi ${n.icon}"></i>
-      </div>
-      <div class="item-content flex-grow-1">
-        <h6 style="font-size:0.85rem">${n.title}</h6>
-        ${n.body ? `<p style="font-size:0.75rem">${n.body}</p>` : ''}
-        <span class="time-ago">${n.time_ago}</span>
-      </div>
-      ${!n.is_read ? '<span class="notif-dot"></span>' : ''}
-    </a>
-  `).join('');
-        }
-
-        // ── Mark single as read ─────────────────────────────────────────────────
-        async function notifMarkRead(e, id, url) {
-            e.preventDefault();
-
-            // تعليم كمقروء في الواجهة فوراً (optimistic)
-            const item = document.querySelector(`[data-id="${id}"]`);
-            if (item) {
-                item.classList.remove('notif-unread');
-                item.classList.add('notif-read');
-                const dot = item.querySelector('.notif-dot');
-                if (dot) dot.remove();
-            }
-
-            // API call
-            await fetch(NOTIF_READ_URL.replace('{id}', id), {
-                method: 'PATCH',
-                headers: {
-                    'X-CSRF-TOKEN': CSRF,
-                    'Accept': 'application/json'
-                },
-            }).then(r => r.json()).then(data => {
-                renderBadge(data.unread_count);
-                lastUnreadCount = data.unread_count;
-            }).catch(() => {});
-
-            // Navigate
-            if (url && url !== '#') window.location.href = url;
-        }
-
-        // ── Mark all as read ─────────────────────────────────────────────────────
-        async function notifMarkAllRead() {
-            await fetch(NOTIF_ALL_READ_URL, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': CSRF,
-                    'Accept': 'application/json'
-                },
-            });
-            renderBadge(0);
-            lastUnreadCount = 0;
-
-            // تحديث الـ DOM
-            document.querySelectorAll('.notif-unread').forEach(el => {
-                el.classList.remove('notif-unread');
-                el.classList.add('notif-read');
-                const dot = el.querySelector('.notif-dot');
-                if (dot) dot.remove();
-            });
-        }
-
-        // ── Bell animation ──────────────────────────────────────────────────────
-        function playBellAnimation() {
-            if (!bell) return;
-            bell.style.animation = 'none';
-            void bell.offsetWidth; // reflow
-            bell.style.animation = 'bell-ring 0.6s ease 3';
-        }
-
-        // ── Start polling ───────────────────────────────────────────────────────
-        fetchNotifications(); // أول طلب فوري
-        notifPollTimer = setInterval(fetchNotifications, POLL_INTERVAL);
-
-        // إيقاف الـ polling عند إغلاق التبويب
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden) {
-                clearInterval(notifPollTimer);
-            } else {
-                fetchNotifications();
-                notifPollTimer = setInterval(fetchNotifications, POLL_INTERVAL);
-            }
-        });
-    </script> --}}
     <script>
         // ═══════════════════════════════════════════════════════════════════════
         // لمسة خيط — Real-time Notification System (Unread Only Mode)

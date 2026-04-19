@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminReviewController;
+use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\NotificationsController;
 use App\Http\Controllers\Admin\OrderController;
@@ -95,6 +96,13 @@ Route::prefix('admin')->group(function () {
         Route::patch('/notifications/{notification}/read', [NotificationsController::class, 'markRead'])->name('admin.notifications.read');
         Route::post('/notifications/mark-all-read',  [NotificationsController::class, 'markAllRead'])->name('admin.notifications.mark-all-read');
 
+
+         // Analytics
+        Route::get('/analytics/live',    [AnalyticsController::class, 'live'])   ->name('admin.analytics.live');
+        Route::get('/analytics/summary', [AnalyticsController::class, 'summary'])->name('admin.analytics.summary');
+        Route::get('/analytics',         function() {
+            return view('admin.analytics');
+        })->name('admin.analytics');
 
         // Settings
         Route::get('/settings', [SettingsController::class, 'index'])->name('admin.settings');

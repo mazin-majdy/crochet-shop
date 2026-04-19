@@ -1,4 +1,5 @@
 <?php
+
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,15 +16,15 @@ return new class extends Migration
             $table->string('email', 150)->nullable();
 
             $table->enum('subject', ['order', 'custom', 'inquiry', 'other'])
-                  ->default('inquiry');
+                ->default('inquiry');
 
             $table->text('message');
 
             // ربط اختياري بمنتج محدد
             $table->foreignId('product_id')
-                  ->nullable()
-                  ->constrained('products')
-                  ->nullOnDelete();
+                ->nullable()
+                ->constrained('products')
+                ->nullOnDelete();
 
             $table->boolean('is_read')->default(false);
             $table->timestamp('read_at')->nullable();

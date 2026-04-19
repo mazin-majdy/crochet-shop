@@ -37,6 +37,16 @@ body {
 }
 @media (hover: none) { body { cursor: auto; } }
 
+@media (max-width: 768px) {
+  .product-card {
+    @apply transform transition active:scale-95;
+  }
+
+  /* منع الضغط المزدوج على الزووم */
+  a, button {
+    touch-action: manipulation;
+  }
+}
 /* ── Custom Cursor ───────────────────────────────────────────────── */
 #cursor-dot {
   position: fixed; width: 10px; height: 10px;

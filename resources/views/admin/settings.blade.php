@@ -384,11 +384,11 @@
                                                 <input type="hidden" name="{{ $key }}" value="0">
                                                 <input type="checkbox" name="{{ $key }}" value="1"
                                                     {{ $setting->value == '1' ? 'checked' : '' }}>
-                                                    <span class="toggle-slider"></span>
-                                                </label>
-                                                <span class="toggle-label">
-                                                    {{ $setting->value == '1' ? 'مُفعَّل' : 'معطَّل' }}
-                                                </span>
+                                                <span class="toggle-slider"></span>
+                                            </label>
+                                            <span class="toggle-label">
+                                                {{ $setting->value == '1' ? 'مُفعَّل' : 'معطَّل' }}
+                                            </span>
                                         </div>
                                     @elseif($setting->type === 'textarea')
                                         <textarea name="{{ $key }}" class="s-input s-textarea" rows="3">{{ old($key, $setting->value) }}</textarea>

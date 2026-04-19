@@ -45,9 +45,9 @@ return new class extends Migration
             ])->nullable();
 
             $table->enum('payment_status', [
-                'unpaid',   // لم يُدفع
-                'pending',  // الدفع بانتظار تأكيد
-                'paid',     // تم الدفع
+                'unpaid',
+                'pending',
+                'paid',
             ])->default('unpaid');
 
             // ── حالة الطلب ──────────────────────────────────────────────

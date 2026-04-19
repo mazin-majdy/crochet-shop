@@ -645,7 +645,7 @@
         <div
             style="background:linear-gradient(135deg,#422018,#7b1113);border-radius:28px;padding:52px 44px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;position:relative;overflow:hidden">
             <div
-                style="position:absolute;inset:0;background-image:url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23d4af37' opacity='0.15'/%3E%3C/svg%3E\");background-size:40px 40px">
+                style="position:absolute;inset:0;background-image:url('data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'40\' height=\'40\'%3E%3Ccircle cx=\'20\' cy=\'20\' r=\'1.5\' fill=\'%23d4af37\' opacity=\'0.15\'/%3E%3C/svg%3E');background-size:40px 40px">
             </div>
             <div style="position:relative;z-index:1">
                 <h2 style="font-family:'Amiri',serif;font-size:2rem;font-weight:700;color:#fff;margin-bottom:10px">هل لديك

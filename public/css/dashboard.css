@@ -31,9 +31,21 @@
     overflow-x: hidden;
     margin: 0;
   }
+ 
   a {
     text-decoration: none;
   }
+
+  @media (max-width: 768px) {
+  .product-card {
+    @apply transform transition active:scale-95;
+  }
+
+  /* منع الضغط المزدوج على الزووم */
+  a, button {
+    touch-action: manipulation;
+  }
+}
 
   /* ─── Sidebar ─── */
   .sidebar {

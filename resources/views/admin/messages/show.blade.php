@@ -1,4 +1,3 @@
-{{-- resources/views/admin/messages/show.blade.php --}}
 @extends('layouts.admin')
 @section('title', 'الرسالة')
 @section('page-title', 'تفاصيل الرسالة')

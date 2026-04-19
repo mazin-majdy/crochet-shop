@@ -29,8 +29,8 @@ class OrderController extends Controller
             $s = $request->search;
             $query->where(function ($q) use ($s) {
                 $q->where('order_number',   'like', "%{$s}%")
-                  ->orWhere('customer_name',  'like', "%{$s}%")
-                  ->orWhere('customer_phone', 'like', "%{$s}%");
+                    ->orWhere('customer_name',  'like', "%{$s}%")
+                    ->orWhere('customer_phone', 'like', "%{$s}%");
             });
         }
 
@@ -89,7 +89,7 @@ class OrderController extends Controller
             'notes'            => 'nullable|string|max:1000',
         ], [
             'customer_name.required' => 'اسم العميل مطلوب',
-            'customer_phone.required'=> 'رقم الجوال مطلوب',
+            'customer_phone.required' => 'رقم الجوال مطلوب',
             'product_id.required'    => 'يرجى اختيار منتج',
         ]);
 

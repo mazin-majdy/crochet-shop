@@ -14,6 +14,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'checkUserType' => \App\Http\Middleware\checkUserType::class,
             'maintenance' => \App\Http\Middleware\MaintenanceMode::class,
+            'track.views' => \App\Http\Middleware\TrackPageView::class,
+
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

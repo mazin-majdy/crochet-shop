@@ -21,7 +21,7 @@ return new class extends Migration
 
             // الفئة المستهدفة: kids | girls | women | men | general
             $table->enum('target', ['kids', 'girls', 'women', 'men', 'general'])
-                  ->default('general');
+                ->default('general');
 
             $table->string('tags')->nullable();          // فصل بفاصلة
             $table->string('image')->nullable();         // الصورة الرئيسية
