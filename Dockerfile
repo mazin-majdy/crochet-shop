@@ -1,14 +1,11 @@
 FROM webdevops/php-nginx:8.2
 
-# تثبيت Node.js و npm باستخدام apt (لأن الصورة مبنية على Debian)
-USER root
-RUN apt-get update && apt-get install -y nodejs npm && rm -rf /var/lib/apt/lists/*
-USER application
-
 WORKDIR /app
+
+# نسخ الملفات مع ضبط المالك أثناء البناء (مسموح)
 COPY --chown=application:application . /app
 
-# تجهيز المشروع
+# كل التجهيزات بتتم وقت البناء (كـ root تلقائياً - مسموح)
 RUN cp .env.example .env && \
     composer install --no-dev --optimize-autoloader --no-scripts && \
     php artisan key:generate && \
@@ -17,3 +14,7 @@ RUN cp .env.example .env && \
     npm run build
 
 EXPOSE 8080
+
+# ⚠️ ملاحظة مهمة: ما نكتب CMD نهائياً!
+# الصورة مهيأة مسبقاً بتشغل Nginx + PHP-FPM تلقائياً
+# والمهاجريشن رح نشغلها يدوياً من الـ Shell بعد النشر
