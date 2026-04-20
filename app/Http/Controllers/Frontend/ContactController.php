@@ -11,7 +11,8 @@ class ContactController extends Controller
 {
     public function index()
     {
-        return view('frontend.contact');
+        $paymentMethods = config('paymentMethods');
+        return view('frontend.contact', compact('paymentMethods'));
     }
 
     public function send(Request $request)
