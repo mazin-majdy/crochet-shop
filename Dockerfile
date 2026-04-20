@@ -2,11 +2,16 @@ FROM webdevops/php-nginx:8.2
 
 WORKDIR /app
 
-# نسخ الملفات مع ضبط المالك أثناء البناء (مسموح)
+# نسخ الملفات مع ضبط المالك
 COPY --chown=application:application . /app
 
-# كل التجهيزات بتتم وقت البناء (كـ root تلقائياً - مسموح)
-RUN cp .env.example .env && \
+# 1. تثبيت nodejs و npm (باستخدام apt لأن الصورة Debian)
+# 2. تجهيز المشروع
+# كل هذا بيصير وقت البناء (مسموح)
+RUN apt-get update && \
+    apt-get install -y nodejs npm && \
+    rm -rf /var/lib/apt/lists/* && \
+    cp .env.example .env && \
     composer install --no-dev --optimize-autoloader --no-scripts && \
     php artisan key:generate && \
     php artisan storage:link && \
@@ -15,6 +20,4 @@ RUN cp .env.example .env && \
 
 EXPOSE 8080
 
-# ⚠️ ملاحظة مهمة: ما نكتب CMD نهائياً!
-# الصورة مهيأة مسبقاً بتشغل Nginx + PHP-FPM تلقائياً
-# والمهاجريشن رح نشغلها يدوياً من الـ Shell بعد النشر
+# ⚠️ ما نكتب CMD: الصورة مهيأة مسبقاً بتشغل الخدمات تلقائياً
