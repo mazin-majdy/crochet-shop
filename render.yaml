@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: crochet-shop
+    env: php
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader --ignore-platform-reqs
+      php artisan key:generate
+      php artisan storage:link
+      npm install
+      npm run build
+    startCommand: |
+      php artisan migrate --force && \
+      php artisan config:cache && \
+      php artisan route:cache && \
+      php artisan view:cache && \
+      php-fpm -D && nginx -g 'daemon off;'
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: DB_CONNECTION
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
