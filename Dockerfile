@@ -5,10 +5,15 @@ WORKDIR /app
 # نسخ الملفات مع ضبط المالك
 COPY --chown=application:application . /app
 
-# خطوة وحدة تجمع: تثبيت npm + تجهيز Laravel + بناء الواجهة + الصلاحيات
-# دمجنا كل شي بـ RUN واحد عشان نتجنب مشاكل الكاش ونضمن إن npm مثبت قبل استخدامه
+# إنشاء سكريبت تشغيل تلقائي للمهاجريشن (الطريقة الرسمية لـ webdevops)
+# أي ملف هنا رح ينفذ تلقائياً قبل ما يقلع السيرفر
+RUN mkdir -p /docker-entrypoint.d && \
+    echo '#!/bin/bash\nphp artisan migrate --force' > /docker-entrypoint.d/99-migrate.sh && \
+    chmod +x /docker-entrypoint.d/99-migrate.sh
+
+# تثبيت وتجهيز كل شي في خطوة وحدة
 RUN apt-get update && \
-    apt-get install -y --no-install-reremends nodejs npm && \
+    apt-get install -y --no-install-recommends nodejs npm && \
     rm -rf /var/lib/apt/lists/* && \
     cp .env.example .env && \
     composer install --no-dev --optimize-autoloader --no-scripts && \
@@ -19,10 +24,9 @@ RUN apt-get update && \
     chmod -R 775 storage bootstrap/cache && \
     chown -R application:application storage bootstrap/cache
 
-# توجيه الويب سيرفر لمجلد public مباشرة (حل مشكلة 403)
+# توجيه الويب سيرفر لمجلد public (حل مشكلة 403)
 ENV WEB_DOCUMENT_ROOT=/app/public
 
 EXPOSE 8080
 
-# تشغيل Migrations تلقائياً ثم رفع الخدمات
-ENTRYPOINT ["sh", "-c", "php artisan migrate --force && /entrypoint.d/20-php-fpm.sh && /entrypoint.d/30-nginx.sh"]
+# ⚠️ لا تكتب CMD أو ENTRYPOINT: الصورة مهيأة مسبقاً وستشغل الخدمات تلقائياً
