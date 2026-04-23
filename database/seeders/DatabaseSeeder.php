@@ -14,14 +14,17 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->command->info('🚀 جاري تشغيل البيانات التجريبية...');
+
         // ─── مدير الموقع ──────────────────────────────
-        User::firstOrCreate(
+        $admin = User::firstOrCreate(
             ['email' => 'admin@lamsitkhait.com'],
             [
                 'name'     => 'مدير لمسة خيط',
                 'password' => Hash::make('Admin@123456'),
             ]
         );
+        $this->command->info('✅ تم إنشاء حساب المدير: admin@lamsitkhait.com');
 
         // ─── منتجات تجريبية ───────────────────────────
         $products = [
@@ -140,12 +143,20 @@ class DatabaseSeeder extends Seeder
             ],
         ];
 
+
+
         foreach ($products as $productData) {
-            $productData['slug'] = Str::slug($productData['name'].'-'.Str::random(5));
+            $productData['slug'] = Str::slug($productData['name'] . '-' . Str::random(5));
             $productData['is_featured'] = $productData['is_featured'] ?? false;
             $productData['is_active'] = true;
+
+            // حقول افتراضية لو مطلوبة
+            $productData['image'] = $productData['image'] ?? 'products/placeholder.jpg';
+            $productData['stock'] = $productData['stock'] ?? 10;
+
             Product::firstOrCreate(['name' => $productData['name']], $productData);
         }
+        $this->command->info('✅ تم إضافة ' . count($products) . ' منتج تجريبي');
 
         // ─── رسائل تجريبية ────────────────────────────
         $messages = [
@@ -174,7 +185,13 @@ class DatabaseSeeder extends Seeder
         ];
 
         foreach ($messages as $msg) {
-            ContactMessage::create($msg);
+            ContactMessage::firstOrCreate(
+                ['phone' => $msg['phone'], 'message' => $msg['message']],
+                $msg
+            );
         }
+        $this->command->info('✅ تم إضافة ' . count($messages) . ' رسالة تجريبية');
+
+        $this->command->info('🎉 اكتمل تشغيل السييدر بنجاح!');
     }
 }

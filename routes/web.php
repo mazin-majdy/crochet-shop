@@ -13,6 +13,7 @@ use App\Http\Controllers\Frontend\HomeController;
 use App\Http\Controllers\Frontend\ProductsController;
 use App\Http\Controllers\Frontend\ReviewController;
 use App\Http\Controllers\MessagesController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -111,4 +112,17 @@ Route::prefix('admin')->group(function () {
         Route::post('/settings/clear-cache', [SettingsController::class, 'clearCache'])->name('admin.settings.clear-cache');
         Route::post('/settings/clear-messages', [SettingsController::class, 'clearReadMessages'])->name('admin.settings.clear-messages');
     });
+});
+
+
+
+// ⚠️ رابط مؤقت - احذفه بعد الاستخدام!
+Route::get('/run-seeders/{secret}', function ($secret) {
+    if ($secret !== 'lamsit-khait-2026') {
+        abort(403, 'غير مصرح');
+    }
+
+    Artisan::call('migrate:fresh --seed --force');
+
+    return '<pre>'.Artisan::output().'</pre><br>✅ تم تشغيل البيانات! احذف هذا الرابط الآن.';
 });
