@@ -15,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'checkUserType' => \App\Http\Middleware\checkUserType::class,
             'maintenance' => \App\Http\Middleware\MaintenanceMode::class,
             'track.views' => \App\Http\Middleware\TrackPageView::class,
-
+            \App\Http\Middleware\ForceHttps::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
