@@ -4,6 +4,9 @@ node_modules
 *.log
 .DS_Store
 vendor
-public/js
-public/css
-storage/logs/*.log
+tests
+
+# ⚠️ تأكد إن هالأسطر مش موجودة (أو احذفها):
+# public/css
+# public/js
+# public/build

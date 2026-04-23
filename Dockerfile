@@ -2,15 +2,15 @@ FROM webdevops/php-nginx:8.2
 
 WORKDIR /app
 
-# نسخ الملفات مع ضبط المالك
+# نسخ كل الملفات
 COPY --chown=application:application . /app
 
-# إنشاء سكريبت تشغيل تلقائي للمهاجريشن والـ Seeder
+# إنشاء سكريبت المهاجريشن
 RUN mkdir -p /docker-entrypoint.d && \
     echo '#!/bin/bash\nphp artisan migrate --force --seed' > /docker-entrypoint.d/99-migrate.sh && \
     chmod +x /docker-entrypoint.d/99-migrate.sh
 
-# تثبيت وتجهيز كل شي
+# التثبيت والتجهيز
 RUN apt-get update && \
     apt-get install -y --no-install-recommends nodejs npm && \
     rm -rf /var/lib/apt/lists/* && \
@@ -20,15 +20,14 @@ RUN apt-get update && \
     php artisan storage:link && \
     npm install --legacy-peer-deps && \
     npm run build && \
-    # 👇 مهم جداً: صلاحيات مجلد public
+    # 👇 أهم سطر: صلاحيات مجلد public
     chmod -R 755 public && \
     chmod -R 775 storage bootstrap/cache && \
-    chown -R application:application storage bootstrap/cache public
+    chown -R application:application .
 
-# 👇 فرض HTTPS والصلاحيات
+# إعدادات البيئة
 ENV WEB_DOCUMENT_ROOT=/app/public
 ENV APP_URL=https://crochet-shop-y5ii.onrender.com
 ENV ASSET_URL=https://crochet-shop-y5ii.onrender.com
-ENV TRUSTED_PROXIES=*
 
 EXPOSE 8080
