@@ -115,14 +115,45 @@ Route::prefix('admin')->group(function () {
 });
 
 
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
-// ⚠️ رابط مؤقت - احذفه بعد الاستخدام!
 Route::get('/run-seeders/{secret}', function ($secret) {
-    if ($secret !== 'lamsit-khait-2026') {
-        abort(403, 'غير مصرح');
+    try {
+        if ($secret !== 'lamsit-khait-2026') {
+            abort(403, 'غير مصرح');
+        }
+
+        // تأكد من الاتصال بقاعدة البيانات
+        DB::connection()->getPdo();
+        $output = "✅ الاتصال بقاعدة البيانات نجح\n\n";
+
+        // امسح الكاش أولاً
+        $output .= "🔄 جاري مسح الكاش...\n";
+        Artisan::call('config:clear');
+        $output .= Artisan::output();
+
+        Artisan::call('route:clear');
+        $output .= Artisan::output();
+
+        Artisan::call('cache:clear');
+        $output .= Artisan::output();
+
+        // شغل السييدر
+        $output .= "\n🚀 جاري تشغيل السييدر...\n";
+        Artisan::call('migrate:fresh --seed --force');
+        $output .= Artisan::output();
+
+        return '<pre style="direction: ltr; text-align: left; font-family: monospace;">'.$output.'</pre>';
+
+    } catch (\Exception $e) {
+        // أظهر الخطأ الحقيقي
+        return '<div style="color: red; direction: rtl; text-align: right; font-family: Tahoma;">
+            <h2>❌ حدث خطأ:</h2>
+            <p><strong>الرسالة:</strong> '.$e->getMessage().'</p>
+            <p><strong>الملف:</strong> '.$e->getFile().' (سطر '.$e->getLine().')</p>
+            <pre style="background: #f5f5f5; padding: 10px; direction: ltr; text-align: left;">'.$e->getTraceAsString().'</pre>
+        </div>';
     }
-
-    Artisan::call('migrate:fresh --seed --force');
-
-    return '<pre>'.Artisan::output().'</pre><br>✅ تم تشغيل البيانات! احذف هذا الرابط الآن.';
 });
