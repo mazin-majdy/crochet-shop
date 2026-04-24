@@ -14,6 +14,7 @@ use App\Http\Controllers\Frontend\ProductsController;
 use App\Http\Controllers\Frontend\ReviewController;
 use App\Http\Controllers\MessagesController;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -115,9 +116,6 @@ Route::prefix('admin')->group(function () {
 });
 
 
-use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
 
 Route::get('/run-seeders/{secret}', function ($secret) {
     try {
