@@ -150,10 +150,6 @@ class DatabaseSeeder extends Seeder
             $productData['is_featured'] = $productData['is_featured'] ?? false;
             $productData['is_active'] = true;
 
-            // حقول افتراضية لو مطلوبة
-            $productData['image'] = $productData['image'] ?? 'products/placeholder.jpg';
-            $productData['stock'] = $productData['stock'] ?? 10;
-
             Product::firstOrCreate(['name' => $productData['name']], $productData);
         }
         $this->command->info('✅ تم إضافة ' . count($products) . ' منتج تجريبي');
