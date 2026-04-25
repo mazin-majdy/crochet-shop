@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['maintenance'])->group(function () {
+Route::middleware(['maintenance', 'track.views'])->group(function () {
 
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/products', [ProductsController::class, 'index'])->name('products');

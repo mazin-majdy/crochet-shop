@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Models\PageView;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Symfony\Component\HttpFoundation\Response;
 
 class TrackPageView
@@ -45,8 +46,8 @@ class TrackPageView
             ]);
 
             // مسح كاش active_now فقط (الأهم للحظي)
-            \Cache::forget('analytics:active_now');
-            \Cache::forget('analytics:today');
+            Cache::forget('analytics:active_now');
+            Cache::forget('analytics:today');
 
         } catch (\Throwable) {
             // صمت — لا تكسر الموقع بسبب تحليلات

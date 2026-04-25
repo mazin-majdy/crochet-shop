@@ -30,4 +30,8 @@ ENV WEB_DOCUMENT_ROOT=/app/public
 ENV APP_URL=https://crochet-shop-y5ii.onrender.com
 ENV ASSET_URL=https://crochet-shop-y5ii.onrender.com
 
+RUN echo "* * * * * cd /app && php artisan schedule:run >> /dev/null 2>&1" > /etc/cron.d/laravel-scheduler && \
+    chmod 0644 /etc/cron.d/laravel-scheduler && \
+    crontab /etc/cron.d/laravel-scheduler
+
 EXPOSE 8080
