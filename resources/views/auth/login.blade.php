@@ -88,7 +88,7 @@
                             <i class="bi bi-envelope"></i>
                         </span>
                         <input type="email" name="email" value="{{ old('email') }}" class="form-control"
-                            style="padding-right:42px" placeholder="admin@lamsitkhait.com" required
+                            style="padding-right:42px" placeholder="example@gmail.com" required
                             autocomplete="email">
                     </div>
                 </div>
